@@ -74,6 +74,7 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
                 }
             }
         });
+        LoginScreen loginScreen = new LoginScreen(this);
     }
 
     private void initializedComponents() {
@@ -203,7 +204,14 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
         rowData = new Vector<>();
         rowData.add(txtInventoryNo.getText());
         rowData.add(txtInventoryName.getText());
-        rowData.add(txtStockQuantity.getText());
+
+        // Validate and add Stock Quantity
+        String stockQuantityText = txtStockQuantity.getText();
+        if (!stockQuantityText.matches("\\d+")) {
+            JOptionPane.showMessageDialog(this, "Stock Quantity must be a positive integer", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        rowData.add(stockQuantityText);
 
         // Check if txtStockPrice is not empty before parsing
         String stockPriceText = txtStockPrice.getText();
@@ -217,7 +225,7 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
                 // Handle the case where parsing fails (e.g., invalid double format)
                 JOptionPane.showMessageDialog(this, "Invalid Stock Price format. Please enter a valid number.",
                         "Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace(); // You might want to log or handle the exception accordingly
+                return;
             }
         } else {
             // Handle the case where txtStockPrice is empty
@@ -227,9 +235,9 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
             // Set a default value for stock price
             rowData.add(0.0);
         }
-
         rowData.add(getFormattedDate());
     }
+
 
 
     private String getFormattedDate() {
@@ -320,6 +328,10 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model_inventory);
         tbl_Inventory.setRowSorter(sorter);
         sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText));
+        if (tbl_Inventory.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "No matching results found", "Search Results", JOptionPane.INFORMATION_MESSAGE);
+            txtSearch.setText("");
+        }
     }
 
     private void process() {
@@ -361,6 +373,7 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
                 txtInventoryNo.setText(getRowCount());
                 resetComponents();
             }
+            JOptionPane.showMessageDialog(this, "Item has been successfully " + (selectedRow >= 0 ? "updated" : "added"), "Success", JOptionPane.INFORMATION_MESSAGE);
         } else if (e.getSource().equals(btnRemove)) {
             int selectedRow = tbl_Inventory.getSelectedRow();
             if (selectedRow >= 0) {
@@ -379,7 +392,10 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Please select a row to remove.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else if (e.getSource().equals(btnClear)) {
-            resetComponents();
+            int option = JOptionPane.showConfirmDialog(this, "Are you sure you want to clear the form?", "Confirmation", JOptionPane.YES_NO_OPTION);
+            if (option == JOptionPane.YES_OPTION) {
+                resetComponents();
+            }
         } else if (e.getSource().equals(btnClose)) {
             int option = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit the program?", "Exit Confirmation", JOptionPane.YES_NO_OPTION);
             if (option == JOptionPane.YES_OPTION) {
@@ -400,11 +416,11 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
         SwingUtilities.invokeLater(() -> {
             InventorySystem inventorySystem = new InventorySystem();
             inventorySystem.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            inventorySystem.setVisible(true);
-            inventorySystem.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
+            inventorySystem.setVisible(false); // Initially hide the main window
+            inventorySystem.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                     inventorySystem.process(); // Call the process method when closing
+                    System.exit(0);
                 }
             });
         });
