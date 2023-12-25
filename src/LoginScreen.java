@@ -19,104 +19,123 @@ public class LoginScreen extends JFrame implements ActionListener {
 
     private final InventorySystem inventorySystem;
 
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            InventorySystem inventorySystem = new InventorySystem();
+            inventorySystem.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            inventorySystem.setVisible(false); // Initially hide the main window
+            inventorySystem.addWindowListener(new java.awt.event.WindowAdapter() {
+                public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                    inventorySystem.process(); // Call the process method when closing
+                    System.exit(0);
+                }
+            });
+        });
+    }
     public LoginScreen(InventorySystem inventorySystem) {
-        super("Login for Lots4Less Inventory Management System");
+        super("Login for Lots4Less IMS");
         this.inventorySystem = inventorySystem;
-        setSize(700, 200); // Adjusted size to accommodate the image
+        setSize(600, 400); // Adjusted height to accommodate social media icons
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Customize the background color here
-        getContentPane().setBackground(new Color(244, 160, 170, 100)); // Example: Light Gray
+        getContentPane().setBackground(new Color(244, 190, 240, 200));
 
-        // Set a custom icon (replace "path/to/icon.png" with your icon file path)
-        setIconImage(new ImageIcon("InvSys_UI/Lots4Less_LOGO.jpg").getImage());
+        // Set a custom icon
+        setIconImage(new ImageIcon("InvMngSys_UI/Lots4Less_LOGO.jpg").getImage());
 
-        // Create a panel with GridBagLayout
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        // Create an ImageIcon for the image (replace "path/to/image.jpg" with your image file path)
-        ImageIcon sideImageIcon = new ImageIcon("InvSys_UI/Lots4Less_LOGO.jpg");
-        Image sideImage = sideImageIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-        ImageIcon scaledSideImageIcon = new ImageIcon(sideImage);
-
-        // Add JLabel for the image
-        JLabel sideImageLabel = new JLabel(scaledSideImageIcon);
-        gbc.gridx = 2; // Adjust the column based on your layout
-        gbc.gridy = 0; // Adjust the row based on your layout
-        gbc.gridheight = 3; // Adjust the grid height based on your layout
-        panel.add(sideImageLabel, gbc);
+        // Use null layout for absolute positioning
+        setLayout(null);
 
         // Add components for username, password, and login button
-        txtUsername = new JTextField(15);
-        txtPassword = new JPasswordField(15);
+        JLabel lblUsername = new JLabel("Username:");
+        txtUsername = new JTextField(10);
+        JLabel lblPassword = new JLabel("Password:");
+        txtPassword = new JPasswordField(10);
 
-        btnLogin = new JButton("Login");
+        btnLogin = new JButton("Login", new ImageIcon("InvMngSys_UI/"));
         btnLogin.addActionListener(this);
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridheight = 1; // Reset grid height
-        panel.add(new JLabel("Username:"), gbc);
+        // Set bounds for each component
+        lblUsername.setBounds(50, 10, 150, 30);
+        txtUsername.setBounds(50, 50, 150, 30);
+        lblPassword.setBounds(50, 90, 150, 30);
+        txtPassword.setBounds(50, 130, 150, 30);
+        btnLogin.setBounds(50, 170, 80, 30);
 
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        panel.add(txtUsername, gbc);
+        // Create a subPanel for the image
+        JPanel imagePanel = createImagePanel();
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(new JLabel("Password:"), gbc);
+        // Set bounds for the image panel
+        imagePanel.setBounds(300, 20, 250, 250);
 
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        panel.add(txtPassword, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(btnLogin, gbc);
+        // Add components to the frame
+        add(lblUsername);
+        add(txtUsername);
+        add(lblPassword);
+        add(txtPassword);
+        add(btnLogin);
+        add(imagePanel);
 
         // Add icons for Facebook, Instagram, and Twitter
-        ImageIcon facebookIcon = new ImageIcon("InvSys_UI/FacebookLOGO.png");
-        JLabel facebookLabel = new JLabel(new ImageIcon(facebookIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
+        ImageIcon facebookIcon = new ImageIcon("InvMngSys_UI/FacebookLOGO.png");
+        JLabel facebookLabel = new JLabel(new ImageIcon(facebookIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
         facebookLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         facebookLabel.setToolTipText("Visit Lots4Less Facebook");
         facebookLabel.addMouseListener(new LinkMouseListener("https://www.facebook.com/LotsForLessPH/"));
 
-        ImageIcon instagramIcon = new ImageIcon("InvSys_UI/InstagramICON.png");
-        JLabel instagramLabel = new JLabel(new ImageIcon(instagramIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
+        ImageIcon instagramIcon = new ImageIcon("InvMngSys_UI/InstagramICON.png");
+        JLabel instagramLabel = new JLabel(new ImageIcon(instagramIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
         instagramLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         instagramLabel.setToolTipText("Visit Lots4Less Instagram");
         instagramLabel.addMouseListener(new LinkMouseListener("https://www.instagram.com/explore/tags/pixelart/top/"));
 
-        ImageIcon twitterIcon = new ImageIcon("InvSys_UI/TwitterXLOGO.png");
-        JLabel twitterLabel = new JLabel(new ImageIcon(twitterIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
+        ImageIcon twitterIcon = new ImageIcon("InvMngSys_UI/TwitterXLOGO.png");
+        JLabel twitterLabel = new JLabel(new ImageIcon(twitterIcon.getImage().getScaledInstance(45, 45, Image.SCALE_SMOOTH)));
         twitterLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         twitterLabel.setToolTipText("Visit Lots4Less Twitter");
         twitterLabel.addMouseListener(new LinkMouseListener("https://twitter.com/pixelartjourney?lang=en"));
 
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        panel.add(facebookLabel, gbc);
+        // Set bounds for each social media icon
+        facebookLabel.setBounds(50, 220, 50, 50);
+        instagramLabel.setBounds(110, 220, 50, 50);
+        twitterLabel.setBounds(170, 220, 45, 45);
 
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        panel.add(instagramLabel, gbc);
+        // Add the social media icons to the frame
+        add(facebookLabel);
+        add(instagramLabel);
+        add(twitterLabel);
 
-        gbc.gridx = 2;
-        gbc.gridy = 3;
-        panel.add(twitterLabel, gbc);
+        // Add your custom image and link below
+        ImageIcon customIcon = new ImageIcon("InvMngSys_UI/WELCOME.png");
+        JLabel customLabel = new JLabel(new ImageIcon(customIcon.getImage().getScaledInstance(250, 100, Image.SCALE_SMOOTH)));
 
-        add(panel);
-        setLocationRelativeTo(null); // Center the frame on the screen
+        customLabel.setBounds(275, 270, 300, 100);
+        add(customLabel);
+
+        setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    private JPanel createImagePanel() {
+        JPanel imagePanel = new JPanel();
+
+        // Create an ImageIcon for the image
+        ImageIcon sideImageIcon = new ImageIcon("InvMngSys_UI/Lots4Less_LOGO.jpg");
+        Image sideImage = sideImageIcon.getImage().getScaledInstance(250, 250, Image.SCALE_SMOOTH);
+        ImageIcon scaledSideImageIcon = new ImageIcon(sideImage);
+
+        // Add JLabel for the image to the image panel
+        JLabel sideImageLabel = new JLabel(scaledSideImageIcon);
+        imagePanel.add(sideImageLabel);
+
+        return imagePanel;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource().equals(btnLogin)) {
-            // Check username and password (replace with your authentication logic)
+            // Check username and password
             String username = txtUsername.getText();
             String password = new String(txtPassword.getPassword());
 

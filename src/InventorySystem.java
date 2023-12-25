@@ -7,6 +7,7 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.Font;
+import java.io.File;
 import java.time.Month;
 import java.time.Year;
 import java.util.Collections;
@@ -43,9 +44,9 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
         add(searchPanel).setBounds(480, 320, 400, 20);
 
         add(panelInventoryTable()).setBounds(480, 20, 600, 290);
-        add(panelInventoryButtons()).setBounds(10, 215, 450, 30);
-        add(setBackgroundImage("InvSys_UI/BG_UI_Splash.png"));
-        setAppIcon("InvSys_UI/Lots4Less_LOGO.jpg");
+        add(panelInventoryButtons()).setBounds(10, 215, 450, 50);
+        add(setBackgroundImage("InvMngSys_UI/BG_UI_Splash.png"));
+        setAppIcon("InvMngSys_UI/Lots4Less_LOGO.jpg");
 
         setInventoryFrame("Inventory Management System for Lots4Less", 1100, 400, true, JFrame.EXIT_ON_CLOSE, true);
         setLocationRelativeTo(null);
@@ -59,7 +60,7 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
 
         inventory_db = new InventoryDatabase("stock_inventory.txt");
         //It follows this format -
-        //"Inventory No." | "Inventory Name" | "Stock Quantity" | "Stock Price" | "Selling Price" | "Date Added"
+        //"Inventory No." # "Inventory Name" # "Stock Quantity" # "Stock Price" # "Selling Price" # "Date Added"
         inventory_db.displayRecord(model_inventory);
 
         resetComponents();
@@ -95,12 +96,24 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
         cboDay.setFont(comboBoxFont);
         cboYear.setFont(comboBoxFont);
 
-        btnAdd = new JButton("Add");
-        btnUpdate = new JButton("Update");
-        btnClear = new JButton("Clear");
-        btnRemove = new JButton("Remove");
-        btnClose = new JButton("Close");
-        btnSearch = new JButton("Search");
+        btnAdd = makeCircularButton(new ImageIcon("InvMngSys_UI/Add_Button.png"), "InvMngSys_UI/Add_Button.png");
+        btnAdd.setToolTipText("Adds Inventory");
+
+        btnUpdate = makeCircularButton(new ImageIcon("InvMngSys_UI/Update_Button.png"), "InvMngSys_UI/Update_Button.png");
+        btnUpdate.setToolTipText("Updates Inventory");
+
+        btnClear = makeCircularButton(new ImageIcon("InvMngSys_UI/Clear_Button.png"), "InvMngSys_UI/Clear_Button.png");
+        btnClear.setToolTipText("Clears Inventory Form");
+
+        btnRemove = makeCircularButton(new ImageIcon("InvMngSys_UI/Remove_Button.png"), "InvMngSys_UI/Remove_Button.png");
+        btnRemove.setToolTipText("Removes Inventory");
+
+        btnClose = makeCircularButton(new ImageIcon("InvMngSys_UI/Close_Button.png"), "InvMngSys_UI/Close_Button.png");
+        btnClose.setToolTipText("Closes the Program");
+
+        btnSearch = makeCircularButton(new ImageIcon("InvMngSys_UI/Search_Button.png"), "InvMngSys_UI/Search_Button.png");
+        btnSearch.setToolTipText("Searches the Inventory");
+
 
         model_inventory = new DefaultTableModel();
         Vector<Object> columns = new Vector<>();
@@ -145,7 +158,7 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
     private JPanel panelInventoryButtons() {
         JPanel panelInventoryButtons = new JPanel();
         panelInventoryButtons.setLayout(new GridLayout(1, 3, 5, 2));
-
+        panelInventoryButtons.setOpaque(false);
         panelInventoryButtons.add(btnAdd);
         panelInventoryButtons.add(btnUpdate);
         panelInventoryButtons.add(btnRemove);
@@ -153,6 +166,27 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
         panelInventoryButtons.add(btnClose);
 
         return panelInventoryButtons;
+    }
+
+    private JButton makeCircularButton(Icon icon, String imagePath) {
+        // Check if the image file exists
+        File imageFile = new File(imagePath);
+        if (!imageFile.exists()) {
+            JOptionPane.showMessageDialog(this, "Image file not found: " + imagePath, "Error", JOptionPane.ERROR_MESSAGE);
+            return new JButton();  // Return an empty button or handle it appropriately
+        }
+
+        JButton button = new JButton("", icon);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+
+        Image img = ((ImageIcon) icon).getImage();
+        int diameter = 50;
+        Image scaledImg = img.getScaledInstance(diameter, diameter, Image.SCALE_SMOOTH);
+        button.setIcon(new ImageIcon(scaledImg));
+        button.setPreferredSize(new Dimension(diameter, diameter));
+        return button;
     }
 
     private JPanel panelInventoryTable() {
@@ -203,21 +237,37 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
     private void getData() {
         rowData = new Vector<>();
         rowData.add(txtInventoryNo.getText());
-        rowData.add(txtInventoryName.getText());
+
+        // Validate and add Inventory Name
+        String inventoryName = txtInventoryName.getText().trim();
+        if (inventoryName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Inventory Name cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        } else {
+            rowData.add(inventoryName);
+        }
 
         // Validate and add Stock Quantity
         String stockQuantityText = txtStockQuantity.getText();
-        if (!stockQuantityText.matches("\\d+")) {
-            JOptionPane.showMessageDialog(this, "Stock Quantity must be a positive integer", "Error", JOptionPane.ERROR_MESSAGE);
+        try {
+            int stockQuantity = Integer.parseInt(stockQuantityText);
+            if (stockQuantity < 0) {
+                throw new NumberFormatException();
+            }
+            rowData.add(stockQuantity);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Stock Quantity must be a non-negative integer", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        rowData.add(stockQuantityText);
 
         // Check if txtStockPrice is not empty before parsing
         String stockPriceText = txtStockPrice.getText();
         if (!stockPriceText.isEmpty()) {
             try {
                 double stockPrice = Double.parseDouble(stockPriceText);
+                if (stockPrice < 0) {
+                    throw new NumberFormatException();
+                }
                 rowData.add(stockPrice);
                 double sellingPrice = stockPrice * 1.1;
                 rowData.add(String.format("%.2f", sellingPrice)); // Selling Price is 10% more than Stock Price
@@ -238,22 +288,15 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
         rowData.add(getFormattedDate());
     }
 
-
-
     private String getFormattedDate() {
         Integer selectedDay = (Integer) cboDay.getSelectedItem();
         Month selectedMonth = (Month) cboMonth.getSelectedItem();
         Integer selectedYear = (Integer) cboYear.getSelectedItem();
 
         // Set default values to current date if any of the items is null
-        if (selectedDay == null) {
-            selectedDay = java.time.LocalDate.now().getDayOfMonth();
-        }
-        if (selectedMonth == null) {
-            selectedMonth = java.time.LocalDate.now().getMonth();
-        }
-        if (selectedYear == null) {
-            selectedYear = java.time.LocalDate.now().getYear();
+        if (selectedDay == null || selectedMonth == null || selectedYear == null) {
+            JOptionPane.showMessageDialog(this, "Please select a valid date", "Error", JOptionPane.ERROR_MESSAGE);
+            return "";
         }
 
         return String.format("%02d/%02d/%04d", selectedMonth.getValue(), selectedDay, selectedYear);
@@ -280,12 +323,11 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
     private void setEditingMode() {
         editingMode = false;
         btnAdd.setEnabled(true);
+        btnUpdate.setEnabled(false);
+        btnRemove.setEnabled(false);
         btnClear.setEnabled(true);
         btnClose.setEnabled(true);
         btnSearch.setEnabled(true);
-
-        // Disable the "Update" button when in editing mode, and vice versa
-        btnUpdate.setEnabled(true);
     }
 
     private void handleTableSelection(ListSelectionEvent e, JTable table) {
@@ -324,17 +366,25 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
     }
 
     private void performSearch() {
-        String searchText = txtSearch.getText().toLowerCase();
+        String searchText = txtSearch.getText().toLowerCase().trim();
+        if (searchText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a search term", "Error", JOptionPane.ERROR_MESSAGE);
+            tbl_Inventory.setRowSorter(null);
+            txtSearch.setText("");
+            return;
+        }
+
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model_inventory);
         tbl_Inventory.setRowSorter(sorter);
         sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText));
         if (tbl_Inventory.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "No matching results found", "Search Results", JOptionPane.INFORMATION_MESSAGE);
+            tbl_Inventory.setRowSorter(null);
             txtSearch.setText("");
         }
     }
 
-    private void process() {
+    public void process() {
         StringBuilder records = new StringBuilder();
         for (int r = 0; r < model_inventory.getRowCount(); r++) {
             for (int c = 0; c < model_inventory.getColumnCount(); c++) {
@@ -410,7 +460,6 @@ public class InventorySystem extends InventoryFrame implements ActionListener {
         // Disable the "Add New" button when in editing mode
         btnAdd.setEnabled(tbl_Inventory.getSelectedRow() == -1);
     }
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
