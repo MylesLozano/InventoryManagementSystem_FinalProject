@@ -23,4 +23,22 @@ This Inventory Management System is designed for Lots4Less and serves as a tool 
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone <https://github.com/MylesLozano/InventoryManagementSystem_FinalProject.git>
+
+Open the project in your preferred IDE.
+
+Run the InventorySystem.java file to start the application.
+
+## Usage
+- **Launch** the application and log in using your username and password.
+- (Note: the username and password are contained in the 'credentials.txt')
+- **Use** the intuitive interface to manage inventory items.
+- **Explore** the features of adding, updating, and removing inventory.
+
+## Contributing
+If you'd like to contribute to the project, please follow the standard GitHub flow:
+
+1. Fork the repository.
+2. Create a new branch.
+3. Make your changes.
+4. Create a pull request.
